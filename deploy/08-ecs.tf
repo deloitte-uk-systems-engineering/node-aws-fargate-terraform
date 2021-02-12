@@ -11,11 +11,12 @@ data "template_file" "task_definition_service_json" {
   template = file("task-definitions/service.json.tpl")
   vars = {
     aws_ecr_repository = aws_ecr_repository.app_image_repository.repository_url
+    tag                = "latest"
   }
 }
 
-data "template_file" "sproutlyapp" {
-  template = file("task-definitions/dummyapp.json.tpl")
+data "template_file" "node_app" {
+  template = file("task-definitions/service.json.tpl")
   vars = {
     aws_ecr_repository = aws_ecr_repository.app_image_repository.repository_url
     tag                = "latest"
@@ -29,7 +30,7 @@ resource "aws_ecs_task_definition" "service" {
   cpu                      = 256
   memory                   = 2048
   requires_compatibilities = ["FARGATE"]
-  container_definitions    = data.template_file.sproutlyapp.rendered
+  container_definitions    = data.template_file.node_app.rendered
   tags = {
     Environment = "staging"
     Application = "dummyapi"
@@ -37,12 +38,12 @@ resource "aws_ecs_task_definition" "service" {
 }
 
 resource "aws_ecs_service" "staging" {
-  name            = "staging"
-  cluster         = aws_ecs_cluster.staging.id
-  task_definition = aws_ecs_task_definition.service.arn
-  desired_count   = 1
+  name                       = "staging"
+  cluster                    = aws_ecs_cluster.staging.id
+  task_definition            = aws_ecs_task_definition.service.arn
+  desired_count              = 1
   deployment_maximum_percent = 250
-  launch_type     = "FARGATE"
+  launch_type                = "FARGATE"
 
   network_configuration {
     security_groups  = [aws_security_group.ecs_tasks.id]
@@ -53,7 +54,7 @@ resource "aws_ecs_service" "staging" {
   load_balancer {
     target_group_arn = aws_lb_target_group.staging.arn
     container_name   = "dummyapi"
-    container_port   = 80
+    container_port   = 3000
   }
 
   depends_on = [aws_lb_listener.https_forward, aws_iam_role_policy_attachment.ecs_task_execution_role]
