@@ -1,30 +1,13 @@
-resource "aws_ecs_task_definition" "node_express_ecs_definition" {
-  family                   = "node_express_ecs_definition"
-  container_definitions    = data.template_file.task_definition_service_json.rendered
-  requires_compatibilities = ["EC2"]
-  task_role_arn            = "arn:aws:iam::830663695860:role/ecsTaskExecutionRole"
-  execution_role_arn       = "arn:aws:iam::830663695860:role/ecsTaskExecutionRole"
-
-}
-
-data "template_file" "task_definition_service_json" {
-  template = file("task-definitions/service.json.tpl")
-  vars = {
-    aws_ecr_repository = aws_ecr_repository.app_image_repository.repository_url
-    tag                = "latest"
-  }
-}
-
 data "template_file" "node_app" {
   template = file("task-definitions/service.json.tpl")
   vars = {
-    aws_ecr_repository = aws_ecr_repository.app_image_repository.repository_url
+    aws_ecr_repository = aws_ecr_repository.node_app.repository_url
     tag                = "latest"
   }
 }
 
 resource "aws_ecs_task_definition" "service" {
-  family                   = "dummyapi-staging"
+  family                   = "node-aws-fargate-app-staging"
   network_mode             = "awsvpc"
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
   cpu                      = 256
@@ -33,7 +16,7 @@ resource "aws_ecs_task_definition" "service" {
   container_definitions    = data.template_file.node_app.rendered
   tags = {
     Environment = "staging"
-    Application = "dummyapi"
+    Application = "node-aws-fargate-app"
   }
 }
 
@@ -53,7 +36,7 @@ resource "aws_ecs_service" "staging" {
 
   load_balancer {
     target_group_arn = aws_lb_target_group.staging.arn
-    container_name   = "dummyapi"
+    container_name   = "node-aws-fargate-app"
     container_port   = 3000
   }
 
@@ -61,10 +44,10 @@ resource "aws_ecs_service" "staging" {
 
   tags = {
     Environment = "staging"
-    Application = "dummyapi"
+    Application = "node-aws-fargate-app"
   }
 }
 
 resource "aws_ecs_cluster" "staging" {
-  name = "tf-ecs-cluster"
+  name = "node-app-ecs-cluster"
 }

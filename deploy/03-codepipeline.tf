@@ -1,13 +1,13 @@
 
 
 resource "aws_codepipeline" "node_express_ecs_codepipeline" {
-  name     = "node_express_ecs_codepipeline"
-  role_arn = aws_iam_role.node_express_ecs_codepipeline_role.arn
+  name       = "node_express_ecs_codepipeline"
+  role_arn   = aws_iam_role.node_express_ecs_codepipeline_role.arn
   depends_on = [aws_ecs_service.staging]
 
 
   artifact_store {
-    location = aws_s3_bucket.node_express_ecs_s3_bucket.bucket
+    location = aws_s3_bucket.node_app.bucket
     type     = "S3"
   }
 
@@ -44,7 +44,7 @@ resource "aws_codepipeline" "node_express_ecs_codepipeline" {
       version          = "1"
 
       configuration = {
-        ProjectName = "node_express_ecs_codebuild_project"
+        ProjectName = aws_codebuild_project.node_aws_fargate_app.name
       }
     }
   }
@@ -61,8 +61,8 @@ resource "aws_codepipeline" "node_express_ecs_codepipeline" {
       version         = "1"
 
       configuration = {
-        ClusterName = "tf-ecs-cluster"
-        ServiceName = "staging"
+        ClusterName = aws_ecs_cluster.staging.name
+        ServiceName = aws_ecs_service.staging.name
       }
     }
   }
