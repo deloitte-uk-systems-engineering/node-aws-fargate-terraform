@@ -32,7 +32,12 @@ resource "aws_codebuild_project" "node_aws_fargate_app" {
 
     environment_variable {
       name  = "IMAGE_NAME"
-      value = "node-aws-fargate-app"
+      value = var.app_name
+    }
+
+    environment_variable {
+      name  = "CONTAINER_NAME"
+      value = var.app_name
     }
 
     environment_variable {

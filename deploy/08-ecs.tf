@@ -3,12 +3,14 @@ data "template_file" "node_app" {
   vars = {
     aws_ecr_repository            = aws_ecr_repository.node_app.repository_url
     tag                           = "latest"
+    container_name                = var.app_name
     aws_cloudwatch_log_group_name = aws_cloudwatch_log_group.node-aws-fargate-app.name
+    mongo_password_secret_arn     = "${var.mongo_password_secret_arn}:MONGO_PASSWORD::"
   }
 }
 
 resource "aws_ecs_task_definition" "service" {
-  family                   = "node-aws-fargate-app-staging"
+  family                   = "${var.app_name}-${var.environment}"
   network_mode             = "awsvpc"
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
   cpu                      = 256
@@ -16,8 +18,8 @@ resource "aws_ecs_task_definition" "service" {
   requires_compatibilities = ["FARGATE"]
   container_definitions    = data.template_file.node_app.rendered
   tags = {
-    Environment = "staging"
-    Application = "node-aws-fargate-app"
+    Environment = var.environment
+    Application = var.app_name
   }
 }
 
@@ -41,7 +43,7 @@ resource "aws_ecs_service" "staging" {
     container_port   = 3000
   }
 
-  depends_on = [aws_lb_listener.https_forward, aws_iam_role_policy_attachment.ecs_task_execution_role]
+  depends_on = [aws_lb_listener.https_forward, aws_iam_role_policy.ecs_task_execution_role]
 
   tags = {
     Environment = "staging"

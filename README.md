@@ -2,7 +2,7 @@
 
 A reference project to deploy a Node Express app onto Amazon ECS on AWS Fargate with Terraform, inspired by [this](https://dev.to/txheo/a-guide-to-provisioning-aws-ecs-fargate-using-terraform-1joo) tutorial documentation
 
-![AWS Architecture](img/aws-node-ecs.JPG)
+![AWS Architecture](img/aws-node-ecs2.JPG)
 
 ## Pre-requisite
 
@@ -30,7 +30,7 @@ default_region      = "us-east-1"
 docker_username     = "matlau"
 github_username     = "MatthewCYLau"
 github_project_name = "node-aws-fargate-terraform"
-bucket_name         = "node-aws-fargate-app"
+app_name         = "node-aws-fargate-app"
 ```
 
 ## Deploy

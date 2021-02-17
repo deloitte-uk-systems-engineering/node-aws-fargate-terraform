@@ -1,6 +1,6 @@
 [
   {
-    "name": "node-aws-fargate-app",
+    "name": "${container_name}",
     "image": "${aws_ecr_repository}:${tag}",
     "essential": true,
     "logConfiguration": {
@@ -23,8 +23,16 @@
       {
         "name": "NODE_ENV",
         "value": "production"
+      },
+      {
+        "name": "JWT_SECRET",
+        "value": "superscretwhichshouldnotbehere"
       }
     ],
+    "secrets": [{
+      "name": "MONGO_PASSWORD",
+      "valueFrom": "${mongo_password_secret_arn}"
+    }],
     "ulimits": [
       {
         "name": "nofile",
